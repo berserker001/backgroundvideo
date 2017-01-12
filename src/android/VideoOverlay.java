@@ -7,7 +7,9 @@ import android.hardware.Camera;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,7 +33,11 @@ public class VideoOverlay extends ViewGroup implements TextureView.SurfaceTextur
     private int mCameraFacing = Camera.CameraInfo.CAMERA_FACING_BACK;
     private int mOrientation;
 
+
+    public static int rotate;
+
     public VideoOverlay(Context context) {
+
         super(context);
 
         this.setClickable(false);
@@ -90,16 +96,7 @@ public class VideoOverlay extends ViewGroup implements TextureView.SurfaceTextur
             mRecorder = new MediaRecorder();
             mRecorder.setCamera(mCamera);
 
-            CamcorderProfile profile;
-            if (CamcorderProfile.hasProfile(mCameraId, CamcorderProfile.QUALITY_LOW)) {
-                profile = CamcorderProfile.get(mCameraId, CamcorderProfile.QUALITY_LOW);
-            } else {
-                profile = CamcorderProfile.get(mCameraId, CamcorderProfile.QUALITY_HIGH);
-            }
-
-            Camera.Size lowestRes = CameraHelper.getLowestResolution(cameraParameters);
-            profile.videoFrameWidth = lowestRes.width;
-            profile.videoFrameHeight = lowestRes.height;
+            CamcorderProfile profile = CamcorderProfile.get(mCameraId, CamcorderProfile.QUALITY_480P);
 
             mRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
             if (mRecordAudio) {
@@ -126,6 +123,7 @@ public class VideoOverlay extends ViewGroup implements TextureView.SurfaceTextur
             mRecorder.setOutputFile(filePath);
             mRecorder.setOrientationHint(mOrientation);
             mRecorder.prepare();
+
             Log.d(TAG, "Starting recording");
             mRecorder.start();
         } catch (Exception e) {
@@ -179,6 +177,7 @@ public class VideoOverlay extends ViewGroup implements TextureView.SurfaceTextur
                     Camera.Parameters cameraParameters = mCamera.getParameters();
                     Camera.Size previewSize = CameraHelper.getPreviewSize(cameraParameters);
                     cameraParameters.setPreviewSize(previewSize.width, previewSize.height);
+
                     cameraParameters.setRotation(mOrientation);
                     cameraParameters.setRecordingHint(true);
 
